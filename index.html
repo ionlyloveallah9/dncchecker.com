@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNC Checker - Verify Do Not Call Registry Status</title>
+    <meta name="description" content="Check if a phone number is registered on the National Do Not Call Registry. Verify numbers against official registry for telemarketing compliance.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #0c0c2c 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: rgba(10, 10, 20, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 25px rgba(0, 100, 255, 0.7);
+            border: 2px solid #ff3366;
+            position: relative;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #ff3366, #00ccff, #ff3366);
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+        
+        @keyframes borderGlow {
+            0% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo h1 {
+            font-size: 36px;
+            background: linear-gradient(to right, #00ccff, #ff3366);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(0, 204, 255, 0.5);
+        }
+        
+        .top-nav {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-icon {
+            color: #00ccff;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+        
+        .nav-icon:hover {
+            color: #ff3366;
+            transform: scale(1.1);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .container {
+            background: rgba(10, 10, 20, 0.85);
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 100, 255, 0.7);
+            overflow: hidden;
+            border: 2px solid #ff3366;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #ff3366, #00ccff, #ff3366);
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #00ccff;
+        }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid #00ccff;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            color: #fff;
+            box-shadow: 0 0 10px rgba(0, 204, 255, 0.3);
+        }
+        
+        input:focus {
+            border-color: #ff3366;
+            outline: none;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.5);
+        }
+        
+        button {
+            background: linear-gradient(45deg, #ff3366, #ff0033);
+            color: white;
+            border: none;
+            padding: 16px 20px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.7);
+        }
+        
+        .results {
+            margin-top: 30px;
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+            border: 1px solid #ff3366;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+        }
+        
+        .minibox {
+            background: rgba(30, 30, 50, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 极 0 10px rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ccff;
+        }
+        
+        .minibox h2 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ff3366;
+            padding-bottom: 10px;
+            text-shadow: 0 0 5px rgba(0, 204, 255, 0.5);
+        }
+        
+        .message {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+        
+        .code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff3366;
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.7);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #ff3366;
+            border-radius: 50%;
+            width: 30px;
+            height: 30极;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #ff3366;
+            background: rgba(255, 51, 102, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+            border: 1px solid #ff3366;
+            text-shadow: 0 0 5px rgba(255, 51, 102, 0.5);
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background: rgba(10, 10, 20, 0.85);
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 100, 255, 0.7);
+            overflow: hidden;
+            border: 2px solid #ff3366;
+            padding: 30px;
+            position: relative;
+        }
+        
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #ff3366, #00ccff, #ff3366);
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        
+        .sidebar-section h3 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ff3366;
+            padding-bottom: 10px;
+        }
+        
+        .blog-list {
+            list-style: none;
+        }
+        
+        .blog-list li {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 204, 255, 0.3);
+        }
+        
+        .blog-list a {
+            color: #ff3366;
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .blog-list a:hover {
+            text-decoration: underline;
+        }
+        
+        .blog-date {
+            font-size: 12px;
+            color: #00ccff;
+        }
+        
+        /* Content Sections */
+        .content-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 8px;
+            border: 1px solid #00ccff;
+        }
+        
+        .content-section h3 {
+            color: #00ccff;
+            margin-bottom: 15px;
+        }
+        
+        .content-section p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .content-section ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .content-section li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        .disclaimer {
+            background: rgba(255, 51, 102, 0.1);
+            border-left: 4px solid #ff3366;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        /* FAQ Styles */
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 204, 255, 0.3);
+            padding-bottom: 20px;
+        }
+        
+        .faq-question {
+            color: #00ccff;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        /* Blog Styles */
+        .blog-post {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 51, 102, 0.5);
+        }
+        
+        .blog-post h3 {
+            color: #00ccff;
+            margin-bottom: 15px;
+        }
+        
+        .blog-meta {
+            font-size: 14px;
+            color: #00ccff;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        /* Comments Section */
+        .comments-section {
+            margin-top: 40px;
+        }
+        
+        .comment {
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #00ccff;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            color: #00ccff;
+            font-size: 14px;
+        }
+        
+        .comment-form textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(20, 20, 40, 0.8);
+            border: 1px solid #00ccff;
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 15px;
+            min-height: 100px;
+        }
+        
+        /* Footer Styles */
+        .footer {
+            background: rgba(10, 10, 20, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0, 100, 255, 0.7);
+            border: 2px solid #ff3366;
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: #ff3366;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            color: #00ccff;
+            font-size: 14px;
+        }
+        
+        /* Ad Containers */
+        .ad-container {
+            width: 100%;
+            margin: 25px 0;
+            padding: 15px;
+            background: rgba(20, 20, 40, 0.5);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px dashed #00ccff;
+            min-height: 90px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .ad-label {
+            color: #00ccff;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        
+        .ad-placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-style: italic;
+        }
+        
+        /* Cookie Consent */
+        .cookie-consent {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 20, 0.95);
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+            border-top: 2px solid #ff3366;
+        }
+        
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cookie-text {
+            flex: 1;
+            min-width: 300px;
+            margin-right: 20px;
+        }
+        
+        .cookie-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .cookie-btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .cookie-accept {
+            background: linear-gradient(45deg, #ff3366, #ff003极);
+            color: white;
+            border: none;
+        }
+        
+        .cookie-settings {
+            background: transparent;
+            color: #00ccff;
+            border: 1px solid #00ccff;
+        }
+        
+        /* Modal Styles */
+        .privacy-modal, .contact-modal, .about-modal, .terms-modal, .blog-modal, .faq-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1001;
+            overflow: auto;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: rgba(10, 10, 20, 0.95);
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #00ccff;
+            box-shadow: 0 0 25px rgba(0, 100, 255, 0.7);
+            position: relative;
+            color: #fff;
+            line-height: 1.6;
+        }
+        
+        .modal-content h2 {
+            color: #00ccff;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff3366;
+            padding-bottom: 10px;
+        }
+        
+        .modal-content h3 {
+            color: #00ccff;
+            margin: 20px 0 10px;
+        }
+        
+        .modal-content p {
+            margin-bottom: 15px;
+        }
+        
+        .modal-content a {
+            color: #ff3366;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #ff3366;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: bold;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .top-nav {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container, .sidebar {
+                padding: 20px;
+            }
+            
+            .logo h1 {
+                font-size: 28px;
+            }
+            
+            .cookie-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .cookie-text {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <h1>DNC CHECKER</h1>
+                </div>
+                <div class="top-nav">
+                    <a href="#" class="nav-icon" id="blog-link" title="Blog">
+                        <i class="fas fa-blog"></i>
+                    </a>
+                    <a href="#" class="nav-icon" id="faq-link" title="FAQ">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
+                    <a href="#" class="nav-icon" id="about-link" title="About Us">
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+                    <a href="#" class="nav-icon" id="contact-link" title="Contact Us">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="content-area">
+                <div class="container">
+                    <div class="input-group">
+                        <label for="phone">Enter US Phone Number:</label>
+                        <input type="tel" id="phone" name="phone" placeholder="e.g., 1234567890" maxlength="10" required>
+                    </div>
+                    
+                    <button type="submit" id="check-btn">Check Status</button>
+                    
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Checking phone number registries...</p>
+                    </div>
+                    
+                    <div class="error" id="error"></div>
+                    
+                    <div class="results" id="results">
+                        <div id="response-container"></div>
+                    </div>
+                    
+                    <div class="content-section">
+                        <h3>Why We Made This Tool</h3>
+                        <p>This is a simple, free tool built to give you a quick answer to one question: "Am I on the Do Not Call list?"</p>
+                        
+                        <h3>Our Motive</h3>
+                        <p>To provide a fast and convenient check without the hassle. We built this tool for one reason: to help people take control of unwanted calls. Our motive is simple and transparent.</p>
+                        
+                        <h3>We Do Not Save Your Data</h3>
+                        <p>Your privacy is simple here. We don't record, store, or save the phone numbers you check. The result is displayed and then the number is gone from our system.</p>
+                    </div>
+                    
+                    <!-- Ad Container -->
+                    <div class="ad-container">
+                        <div>
+                            <div class="ad-label">Advertisement</div>
+                            <div class="ad-placeholder">Google AdSense Ad</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Blog Preview Section -->
+                    <div class="content-section">
+                        <h3>Latest From Our Blog</h3>
+                        
+                        <div class="blog-post">
+                            <h3>Top 10 Things You Need to Know About the Do Not Call Registry</h3>
+                            <div class="blog-meta">
+                                <span><i class="fas fa-calendar"></i> October 15, 2023</span>
+                                <span><i class="fas fa-user"></i> Admin</span>
+                            </div>
+                            <p>The National Do Not Call Registry is a valuable tool for reducing unwanted telemarketing calls, but many people don't fully understand how it works. Here are the top 10 things you should know about the DNC registry...</p>
+                            <a href="#" class="read-more">Read More →</a>
+                        </div>
+                        
+                        <div class="blog-post">
+                            <h3>How the DNC Registry Affects Business Calling Practices</h3>
+                            <div class="blog-meta">
+                                <span><i class="fas fa-calendar"></i> October 10, 2023</span>
+                                <span><i class="fas fa-user"></i> Admin</span>
+                            </div>
+                            <p>For businesses that rely on telephone marketing, compliance with the Do Not Call Registry is not just a best practice—it's the law. This article explores how the DNC registry affects business calling practices and what companies need to do to stay compliant...</p>
+                            <a href="#" class="read-more">Read More →</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Comments Section -->
+                    <div class="comments-section">
+                        <h3>User Comments</h3>
+                        
+                        <div class="comment">
+                            <div class="comment-header">
+                                <span>John D. - October 12, 2023</span>
+                                <span>Rating: ★★★★★</span>
+                            </div>
+                            <p>This tool saved me so much time! I was able to verify my number was on the registry and now I'm getting far fewer spam calls. Thank you!</p>
+                        </div>
+                        
+                        <div class="comment">
+                            <div class="comment-header">
+                                <span>Sarah M. - October 8, 2023</span>
+                                <span>Rating: ★★★★☆</span>
+                            </div>
+                            <p>Quick and easy to use. I appreciate that you don't store our phone numbers. Privacy is important these days.</p>
+                        </div>
+                        
+                        <div class="comment-form">
+                            <h4>Leave a Comment</h4>
+                            <textarea placeholder="Your comment..."></textarea>
+                            <button>Submit Comment</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <!-- Ad Container -->
+                <div class="ad-container">
+                    <div>
+                        <div class="ad-label">Advertisement</div>
+                        <div class="ad-placeholder">Google AdSense Ad</div>
+                    </div>
+                </div>
+                
+                <!-- Popular Blogs -->
+                <div class="sidebar-section">
+                    <h3>Popular Blog Posts</h3>
+                    <ul class="blog-list">
+                        <li>
+                            <a href="#">How to Stop Robocalls for Good</a>
+                            <div class="blog-date">October 5, 2023</div>
+                        </li>
+                        <li>
+                            <a href="#">Understanding Telemarketing Laws</a>
+                            <div class="blog-date">September 28, 2023</div>
+                        </li>
+                        <li>
+                            <a href="#">5 Benefits of the DNC Registry</a>
+                            <div class="blog-date">September 20, 2023</div>
+                        </li>
+                        <li>
+                            <a href="#">How Businesses Can Stay Compliant</a>
+                            <div class="blog-date">September 15, 2023</div>
+                        </li>
+                        <li>
+                            <a href="#">DNC Registry Myths Debunked</a>
+                            <div class="blog-date">September 10, 2023</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- FAQ Preview -->
+                <div class="sidebar-section">
+                    <h3>Frequently Asked Questions</h3>
+                    <ul class="blog-list">
+                        <li>
+                            <a href="#">How long does it take for my number to be registered?</a>
+                        </li>
+                        <li>
+                            <a href="#">What types of calls are not blocked by the registry?</a>
+                        </li>
+                        <li>
+                            <a href="#">Is there a fee to register my number?</a>
+                        </li>
+                        <li>
+                            <a href="#">How do I report violations?</a>
+                        </li>
+                        <li>
+                            <a href="#">Does the registry expire?</a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Ad Container -->
+                <div class="ad-container">
+                    <div>
+                        <div class="ad-label">Advertisement</div>
+                        <div class="ad-placeholder">Google AdSense Ad</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-links">
+                <a href="#" id="footer-privacy-link">Privacy Policy</a>
+                <a href="#" id="footer-terms-link">Terms of Service</a>
+                <a href="#" id="footer-about-link">About Us</a>
+                <a href="#" id="footer-contact-link">Contact</a>
+                <a href="#" id="footer-blog-link">Blog</a>
+                <a href="#" id="footer-faq-link">FAQ</a>
+            </div>
+            <div class="copyright">
+                <p>© 2023 DNC Checker | 1302 5th Ave, Seattle, WA 98102, USA</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Consent Banner -->
+    <div class="cookie-consent" id="cookie-consent">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <p>We use cookies to enhance your experience and analyze site traffic. By clicking "Accept", you consent to our use of cookies as outlined in our Privacy Policy.</p>
+            </div>
+            <div class="cookie-buttons">
+                <button class="cookie-btn cookie-settings" id="cookie-settings">Settings</button>
+                <button class极="cookie-btn cookie-accept" id="cookie-accept">Accept</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Modal -->
+    <div class="blog-modal" id="blog-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-blog">&times;</button>
+            <h2>DNC Checker Blog</h2>
+            <p>Welcome to our blog where we share insights about the Do Not Call registry, telemarketing regulations, and privacy tips.</p>
+            
+            <div class="blog-post">
+                <h3>Top 10 Things You Need to Know About the Do Not Call Registry</h3>
+                <div class="blog-meta">
+                    <span><i class="fas fa-calendar"></i> October 15, 2023</span>
+                    <span><i class="fas fa-user"></i> Admin</span>
+                    <span><i class="fas fa-comments"></i> 24 Comments</span>
+                </div>
+                <p>The National Do Not Call Registry is a valuable tool for reducing unwanted telemarketing calls, but many people don't fully understand how it works. Here are the top 10 things you should know about the DNC registry:</p>
+                <ol>
+                    <li><strong>It's free to register</strong> - There is no charge to add your number to the registry.</li>
+                    <li><strong>Registration is permanent</strong> - Your number stays on the registry until you remove it or discontinue service.</li>
+                    <li><strong>It takes 31 days for registration to take effect</strong> - Telemarketers have 31 days to update their calling lists.</li>
+                    <li><strong>Some calls are still permitted</strong> - Political calls, charities, surveys, and informational calls are still allowed.</li>
+                    <li><strong>Businesses must comply</strong> - Most telemarketers are required to follow DNC regulations.</li>
+                    <li><strong>You can file complaints</strong> - If you receive illegal calls, you can report them to the FTC.</li>
+                    <li><strong>Cell phones can be registered</strong> - Both landlines and mobile numbers can be added to the registry.</li>
+                    <li><strong>It applies nationwide</strong> - The registry is federal and applies across the United States.</li>
+                    <li><strong>There are exceptions</strong> - Companies you have an existing relationship with may still call for a limited time.</li>
+                    <li><strong>It reduces but doesn't eliminate calls</strong> - While helpful, the registry won't stop all unwanted calls.</li>
+                </ol>
+                <p>Understanding these key points will help you make the most of the Do Not Call Registry and manage your expectations about what it can and cannot do.</p>
+                
+                <div class="comments-section">
+                    <h4>Comments (24)</h4>
+                    
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span>John D. - October 16, 2023</span>
+                            <span>Rating: ★★★★★</span>
+                        </div>
+                        <p>Great article! I didn't realize that political calls were exempt from the DNC registry. That explains why I still get so many around election time.</p>
+                    </div>
+                    
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span>Maria L. - October 15, 2023</span>
+                            <span>Rating: ★★★★☆</span>
+                        </div>
+                        <p>Very informative. I've been on the registry for years but still get some calls. Now I understand why and know how to report violations.</p>
+                    </div>
+                    
+                    <div class="comment-form">
+                        <h4>Leave a Comment</h4>
+                        <textarea placeholder="Your comment..."></textarea>
+                        <button>Submit Comment</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="blog-post">
+                <h3>How the DNC Registry Affects Business Calling Practices</h3>
+                <div class="blog-meta">
+                    <span><i class="fas fa-calendar"></i> October 10, 2023</span>
+                    <span><i class="fas fa-user"></i> Admin</span>
+                    <span><i class="fas fa-comments"></i> 18 Comments</span>
+                </div>
+                <p>For businesses that rely on telephone marketing, compliance with the Do Not Call Registry is not just a best practice—it's the law. The Telephone Consumer Protection Act (TCPA) and the FTC's Telemarketing Sales Rule establish strict requirements for telemarketers.</p>
+                
+                <p>Here's how the DNC registry affects business calling practices:</p>
+                
+                <h4>1. Scrubbing Calling Lists</h4>
+                <p>Businesses must regularly scrub their calling lists against the National Do Not Call Registry. This process must be done at least every 31 days to ensure compliance.</p>
+                
+                <h4>2. Record-Keeping Requirements</h4>
+                <p>Companies must maintain records of their compliance with DNC regulations for at least five years, including documentation of their scrubbing processes.</p>
+                
+                <h4>3. Established Business Relationship Exception</h4>
+                <p>Businesses may call customers with whom they have an established business relationship for up to 18 months after the last purchase or payment, or 3 months after an inquiry or application.</p>
+                
+                <h4>4. Written Consent Exception</h4>
+                <p>Companies may call consumers who have provided written consent to receive calls, even if their number is on the DNC registry.</p>
+                
+                <p>Failure to comply with DNC regulations can result in significant penalties—up to $43,792 per violation. That's why it's essential for businesses to understand and follow these rules carefully.</p>
+                
+                <div class="comments-section">
+                    <h4>Comments (18)</h4>
+                    
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span>BusinessOwner22 - October 12, 2023</span>
+                            <span>Rating: ★★★★★</span>
+                        </div>
+                        <p>As a small business owner, this information is invaluable. We use telemarketing as part of our sales strategy, and compliance is something we take very seriously.</p>
+                    </div>
+                    
+                    <div class="comment-form">
+                        <h4>Leave a Comment</h4>
+                        <textarea placeholder="Your comment..."></textarea>
+                        <button>Submit Comment</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="blog-post">
+                <h3>5 Benefits of the Do Not Call Registry You Might Not Know About</h3>
+                <div class="blog-meta">
+                    <span><i class="fas fa-calendar"></i> October 5, 2023</span>
+                    <span><i class="fas fa-user"></i> Admin</span>
+                    <span><i class="fas fa-comments"></i> 32 Comments</span>
+                </div>
+                <p>While most people know that the Do Not Call Registry helps reduce telemarketing calls, there are several additional benefits that aren't as widely recognized:</p>
+                
+                <h4>1. Reduced Risk of Scams</h4>
+                <p>By reducing the number of telemarketing calls you receive, the registry also reduces your exposure to potential phone scams. Many scams begin with unsolicited calls.</p>
+                
+                <h4>2. Peace and Quiet</h4>
+                <p>Fewer interruptions during family time, meals, and relaxation periods contribute to better quality of life and reduced stress.</p>
+                
+                <h4>3. Protection for Vulnerable Populations</h4>
+                <p>The registry offers added protection for elderly individuals who may be more susceptible to fraudulent schemes or high-pressure sales tactics.</p>
+                
+                <h4>4. Environmental Impact</h4>
+                <p>By reducing unwanted calls, the registry indirectly reduces energy consumption associated with phone use and time spent on unwanted conversations.</p>
+                
+                <h4>5. Increased Productivity</h4>
+                <p>For professionals who work from home or rely on their phones for business, fewer interruptions mean increased productivity and focus.</p>
+                
+                <p>These additional benefits make the Do Not Call Registry an even more valuable resource than many people realize.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Modal -->
+    <div class="faq-modal" id="faq-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-faq">&times;</button>
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How long does it take for my number to be registered on the Do Not Call list?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>After you register your phone number, it takes 31 days for your number to appear on the Do Not Call Registry. Telemarketers have up to 31 days to update their calling lists once your number is added to the registry.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>What types of calls are not blocked by the registry?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>The Do Not Call Registry does not block calls from:</p>
+                    <ul>
+                        <li>Political organizations</li>
+                        <li>Charities</li>
+                        <li>Telephone surveyors</li>
+                        <li>Companies with which you have an established business relationship</li>
+                        <li>Companies you've given written permission to call you</li>
+                        <li>Informational calls (such as appointment reminders)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Is there a fee to register my number on the Do Not Call Registry?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>No, it is completely free to register your number on the National Do Not Call Registry. The Federal Trade Commission operates the registry, and there is no charge for consumers to add their numbers. Be wary of any service that tries to charge you for registration.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How do I report violations of the Do Not Call Registry?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>If you receive a telemarketing call from a company that you believe is violating the Do Not Call Registry rules, you can file a complaint with the Federal Trade Commission:</p>
+                    <ol>
+                        <li>Visit <a href="https://www.donotcall.gov" target="_blank">www.donotcall.gov</a></li>
+                        <li>Click on "Report a Violation"</li>
+                        <li>Provide the date of the call and the phone number or name of the company that called you</li>
+                    </ol>
+                    <p>The FTC reviews complaints and takes action against companies that repeatedly violate the rules.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Does my registration on the Do Not Call Registry expire?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>No, your registration on the National Do Not Call Registry does not expire. Once you register your phone number, it will remain on the registry until you remove it or discontinue service. There is no need to renew your registration.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class极="faq-question">
+                    <span>Can I register my cell phone on the Do Not Call Registry?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, you can register both landline and wireless phone numbers on the National Do Not Call Registry. The registry accepts cell phones and has since it was opened to wireless numbers in 2004.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Will the Do Not Call Registry stop all unwanted calls?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>While the Do Not Call Registry can significantly reduce the number of telemarketing calls you receive, it won't stop all unwanted calls. The registry only applies to legitimate telemarketers. It does not stop calls from:</p>
+                    <ul>
+                        <li>Scammers and illegal robocallers</li>
+                        <li>Political organizations</li>
+                        <li>Charities</li>
+                        <li>Survey companies</li>
+                        <li>Companies with which you have an existing business relationship</li>
+                    </ul>
+                    <p>For scam calls, you may need additional call-blocking solutions.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How can businesses access the Do Not Call Registry?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Businesses that engage in telemarketing must subscribe to the National Do Not Call Registry and download the list of registered numbers. There is a fee for accessing the registry, which varies based on the area codes accessed. Businesses must scrub their calling lists against the registry at least once every 31 days.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Us Modal -->
+    <div class="about-modal" id="about-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-about">&times;</button>
+            <h2>About DNC Checker</h2>
+            
+            <p>DNC Checker is a service dedicated to helping businesses and individuals verify phone numbers against the National Do Not Call Registry. Our mission is to provide easy access to DNC information to support telemarketing compliance.</p>
+            
+            <h3>Our Company</h3>
+            <p>DNC Checker is operated by Compliance Solutions LLC, a provider of regulatory compliance tools and services.</p>
+            
+            <h3>Our Address</h3>
+            <p>Compliance Solutions LLC<br>
+               1302 5th Ave, Seattle, WA 98102, USA</p>
+            
+            <h3>Our Team</h3>
+            <p>Our team consists of compliance experts and software developers with extensive experience in telecommunications regulations and data systems.</p>
+            
+            <h3>Our Data Sources</h3>
+            <p>We source our data from the Blacklist Alliance API, which aggregates information from multiple official and commercial DNC registries.</p>
+            
+            <h3>Our Commitment to Privacy</h3>
+            <p>We take your privacy seriously. When you use our DNC Checker service:</p>
+            <ul>
+                <li>We do not store the phone numbers you check</li>
+                <li>We do not sell your information to third parties</li>
+                <li>We use encryption to protect your data</li>
+                <li>We are transparent about our data practices</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div class="privacy-modal" id="privacy-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-privacy">&times;</button>
+            <h2>Privacy Policy</h2>
+            <p>Last Updated: October 27, 2023</p>
+            
+            <h3>1. Information We Collect</h3>
+            <p>When you use our DNC Checker service, we collect the phone number you enter to check against the Do Not Call registry. We do not store this information after processing your request.</p>
+            
+            <h3>2. How We Use Your Information</h3>
+            <p>The phone number you provide is used solely for the purpose of checking its status against the Do Not Call registry. We do not sell, trade, or otherwise transfer your information to outside parties.</p>
+            
+            <h3>3. Cookies and Tracking Technologies</h3>
+            <p>We use cookies to understand and save your preferences for future visits and compile aggregate data about site traffic and site interaction. We may use both session cookies (which expire once you close your browser) and persistent cookies (which stay on your device until you delete them).</p>
+            
+            <h3>4. Third-Party Services</h3>
+            <p>We use Google AdSense to display ads on our site. AdSense uses cookies to serve personalized ads based on your browsing history. You can opt-out through Google's <a href="https://adssettings.google.com" target="_blank">Ad Settings</a> or the <a href="https://optout.networkadvertising.org/" target="_blank">NAI site</a>.</p>
+            
+            <p>We use a cookie consent banner to manage your preferences. When you consent to cookies, we may use information about your visits to this and other websites to show you personalized ads.</p>
+            
+            <p>We also use the Blacklist Alliance API to check phone numbers against the Do Not Call registry.</p>
+            
+            <h3>5. Data Retention</h3>
+            <极>We do not retain the phone numbers submitted for checking after processing your request. Aggregate data about usage patterns may be retained for analytical purposes.</p>
+            
+            <h3>6. Your Rights</h3>
+            <p>You have the right to access, correct, or delete any personal information we may hold about you. You can also object to the processing of your personal information in certain circumstances.</p>
+            
+            <h3>7. Children's Privacy</h3>
+            <p>Our service is not intended for use by children under the age of 13. We do not knowingly collect personal information极 from children under 13.</p>
+            
+            <h3>8. Changes to This Policy</h3>
+            <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new privacy policy on this page and updating the "Last Updated" date.</p>
+            
+            <h3>9. Contact Us</h3>
+            <p>If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:kudelacynthia@gmail.com">kudelacynthia@gmail.com</a></p>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="contact-modal" id="contact-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-contact">&times;</button>
+            <h2>Contact Us</h2>
+            <p>Have questions or concerns about our service? Reach out to us using the form below or through our contact information.</p>
+            
+            <div class="contact-info">
+                <p><strong>Company Name:</strong> DNC Checker</p>
+                <p><strong>Address:</strong> 1302 5th Ave, Seattle, WA 98102, USA</p>
+                <p><strong>Email:</strong> kudelacynthia@gmail.com</p>
+                <p><strong>Response Time:</极> We typically respond within 24-48 hours</p>
+            </div>
+            
+            <div class="contact-form">
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email" required>
+                <textarea placeholder="Your Message" required></textarea>
+                <button type="submit">Send Message</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div class="terms-modal" id="terms-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-terms">&times;</button>
+            <h2>Terms of Service</h2>
+            <p>Last Updated: October 27, 2023</p>
+            
+            <h3>1. Acceptance of Terms</h3>
+            <p>By accessing and using the DNC Checker service, you accept and极 agree to be bound by the terms and provision of this agreement.</p>
+            
+            <h3>2. Use License</h3>
+            <p>Permission is granted to temporarily use the DNC Checker service for personal and commercial purposes. This is the grant of a license, not a transfer of title.</p>
+            
+            <h3>3. Disclaimer</h3>
+            <p>The materials on DNC Checker's website are provided on an 'as is' basis. DNC Checker makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+            
+            <h3>4. Limitations</h3>
+            <p>In no event shall DNC Checker or its suppliers be liable for any damages (including, without limitation, damages for极 loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on DNC Checker's website.</p>
+            
+            <h3>5. Accuracy of Materials</h3>
+            <p>The materials appearing on DNC Checker's website could include technical, typographical, or photographic errors. DNC Checker does not warrant that any of the materials on its website are accurate, complete or current.</p>
+            
+            <h3>6. Modifications</h3>
+            <p>DNC Checker may revise these terms of service for its website at any time without notice. By using this website you are agreeing to be bound by the then current version of these terms of service.</p>
+            
+            <h3>7. Governing Law</h3>
+            <p>These terms and conditions are governed by and construed in accordance with the laws of the United States and you irrevocably submit to the exclusive jurisdiction of the courts in that location.</p>
+            
+            <h3>8. Advertisements</h3>
+            <p>Our website uses Google AdSense to display advertisements. Google may use cookies to serve ads based on your visit to our site and other sites on the Internet. You may opt out of personalized advertising by visiting <a href="https://adssettings.google.com" target="_blank">Google's Ads Settings</a>.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('dnc-form');
+            const phoneInput = document.getElementById('phone');
+            const checkBtn = document.getElementById('check-btn');
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const responseContainer = document.getElementById('response-container');
+            const cookieConsent = document.getElementById('cookie-consent');
+            const cookieAccept = document.getElementById('cookie-accept');
+            const blogModal = document.getElementById('blog-modal');
+            const faqModal = document.getElementById('faq-modal');
+            const aboutModal = document.getElementById('about-modal');
+            const privacyModal = document.getElementById('privacy-modal');
+            const contactModal = document.getElementById('contact-modal');
+            const termsModal = document.getElementById('terms-modal');
+            const blogLink = document.getElementById('blog-link');
+            const faqLink = document.getElementById('faq-link');
+            const aboutLink = document.getElementById('about-link');
+            const privacyLink = document.getElementById('privacy-link');
+            const contactLink = document.getElementById('contact-link');
+            const termsLink = document.getElementById('terms-link');
+            const footerBlogLink = document.getElementById('footer-blog-link');
+            const footerFaqLink = document.getElementById('footer-faq-link');
+            const footerAboutLink = document.getElementById('footer-about-link');
+            const footerPrivacyLink = document.getElementById('footer-privacy-link');
+            const footerContactLink = document.getElementById('footer-contact-link');
+            const footerTermsLink = document.getElementById('footer-terms-link');
+            const closeBlog = document.getElementById('close-blog');
+            const closeFaq = document.getElementById('close-faq');
+            const closeAbout = document.getElementById('close-about');
+            const closePrivacy = document.getElementById('close-privacy');
+            const closeContact = document.getElementById('close-contact');
+            const closeTerms = document.getElementById('close-terms');
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            // Check cookie consent
+            if (!getCookie('cookie_consent')) {
+                setTimeout(() => {
+                    cookieConsent.style.display = 'block';
+                }, 1000);
+            }
+            
+            // Cookie acceptance
+            cookieAccept.addEventListener('click', function() {
+                setCookie('cookie_consent', 'true', 365);
+                cookieConsent.style.display = 'none';
+            });
+            
+            // FAQ toggle functionality
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const isVisible = answer.style.display === 'block';
+                    
+                    // Close all answers
+                    document.querySelectorAll('.faq-answer').forEach(ans => {
+                        ans.style.display = 'none';
+                    });
+                    
+                    // Toggle current answer
+                    answer.style.display = isVisible ? 'none' : 'block';
+                });
+            });
+            
+            // Blog modal
+            blogLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                blogModal.style.display = 'block';
+            });
+            
+            footerBlogLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                blogModal.style.display = 'block';
+            });
+            
+            closeBlog.addEventListener('click', function() {
+                blogModal.style.display = 'none';
+            });
+            
+            // FAQ modal
+            faqLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                faqModal.style.display = 'block';
+            });
+            
+            footerFaqLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                faqModal.style.display = 'block';
+            });
+            
+            closeFaq.addEventListener('click', function() {
+                faqModal.style.display = 'none';
+            });
+            
+            // About modal
+            aboutLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                aboutModal.style.display = 'block';
+            });
+            
+            footerAboutLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                aboutModal.style.display = 'block';
+            });
+            
+            closeAbout.addEventListener('click', function() {
+                aboutModal.style.display = 'none';
+            });
+            
+            // Privacy policy modal
+            privacyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                privacyModal.style.display = 'block';
+            });
+            
+            footerPrivacyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                privacyModal.style.display = 'block';
+            });
+            
+            closePrivacy.addEventListener('click', function() {
+                privacyModal.style.display = 'none';
+            });
+            
+            // Contact modal
+            contactLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                contactModal.style.display = 'block';
+            });
+            
+            footerContactLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                contactModal.style.display = 'block';
+            });
+            
+            closeContact.addEventListener('click', function() {
+                contactModal.style.display = 'none';
+            });
+            
+            // Terms modal
+            termsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                termsModal.style.display = 'block';
+            });
+            
+            footerTermsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                termsModal.style.display = 'block';
+            });
+            
+            closeTerms.addEventListener('click', function() {
+                termsModal.style.display = 'none';
+            });
+            
+            // Close modals if clicked outside
+            window.addEventListener('click', function(e) {
+                if (e.target === blogModal) {
+                    blogModal.style.display = 'none';
+                }
+                if (e.target === faqModal) {
+                    faqModal.style.display = 'none';
+                }
+                if (e.target === aboutModal) {
+                    aboutModal.style.display = 'none';
+                }
+                if (e.target === privacyModal) {
+                    privacyModal.style.display = 'none';
+                }
+                if (e.target === contactModal) {
+                    contactModal.style.display = 'none';
+                }
+                if (e.target === termsModal) {
+                    termsModal.style.display = 'none';
+                }
+            });
+            
+            // API configuration
+            const API_KEY = 'Pkcka4f2BbdHh2FhzJtx';
+            
+            // Format phone number input
+            phoneInput.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '').slice(0, 10);
+            });
+            
+            // Handle form submission
+            checkBtn.addEventListener('click', handleFormSubmit);
+            
+            async function handleFormSubmit(event) {
+                event.preventDefault();
+                
+                const phoneNumber = phoneInput.value;
+                
+                if (phoneNumber.length !== 10) {
+                    showError('Please enter a valid 10-digit US phone number');
+                    return;
+                }
+                
+                // Show loading state
+                loadingDiv.style.display = 'block';
+                resultsDiv.style.display = 'none';
+                errorDiv.style.display = 'none';
+                
+                try {
+                    // Call Blacklist Alliance API
+                    const response = await fetch(`https://api.blacklistalliance.net/lookup?key=${API_KEY}&ver=v3&resp=json&phone=${phoneNumber}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    displayResponse(data);
+                    
+                    // Show results
+                    resultsDiv.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    showError('Error fetching data: ' + error.message);
+                } finally {
+                    // Hide loading
+                    loadingDiv.style.display = 'none';
+                }
+            }
+            
+            // Function to display the API response
+            function displayResponse(data) {
+                // Construct the message and code strings
+                const message = data.message ? `This number is ${data.message}` : '';
+                const code = data.code ? `Also found at ${data.code}` : '';
+                
+                // Determine the color based on the code value
+                const codeColor = (data.code === 'Federal DNC' || !data.code) ? '#00ccff' : '#ff3366';
+                
+                // HTML to display
+                const html = `
+                    <div class="minibox">
+                        <h2>BLA DETAILS</h2>
+                        <div class="message">${message}</div>
+                        <div class="code" style="color:${codeColor};">${code}</div>
+                    </div>
+                    <div class="disclaimer">
+                        <strong>Note:</strong> This information is provided for reference only. For official compliance verification, please check with the FTC's National Do Not Call Registry directly.
+                    </div>
+                `;
+                
+                responseContainer.innerHTML = html;
+            }
+            
+            // Function to show error
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+            
+            // Cookie functions
+            function setCookie(name, value, days) {
+                const d = new Date();
+                d.setTime(d.get极e() + (days * 24 * 60 * 60 * 1000));
+                const expires = "expires=" + d.toUTCString();
+                document.cookie = name + "=" + value + ";" + expires + ";path=/";
+            }
+            
+            function getCookie(name) {
+                const cookieName = name + "=";
+                const decodedCookie = decodeURIComponent(document.cookie);
+                const cookieArray = decodedCookie.split(';');
+                for(let i = 0; i < cookieArray.length; i++) {
+                    let cookie = cookieArray[i];
+                    while (cookie.charAt(0) === ' ') {
+                        cookie = cookie.substring(1);
+                    }
+                    if (cookie.indexOf(cookieName) === 0) {
+                        return cookie.substring(cookieName.length, cookie.length);
+                    }
+                }
+                return "";
+            }
+        });
+    </script>
+</body>
+</html>
